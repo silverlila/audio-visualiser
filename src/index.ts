@@ -1,8 +1,6 @@
-export * from "./signal";
-export * from "./history";
-export { VISUAL_STATES } from "./states";
-export type { VisualState } from "./states";
-export { MICROPHONE_ERROR_KINDS, createMicrophone, microphoneVisualState } from "./microphone";
+export { createVisualiser } from "./visualiser";
+export type { Visualiser, VisualiserOptions } from "./visualiser";
+export { createMicrophone, microphoneVisualState } from "./microphone";
 export type {
   Microphone,
   MicrophoneDevice,
@@ -11,3 +9,7 @@ export type {
   MicrophoneOptions,
   MicrophoneSnapshot,
 } from "./microphone";
+export { VISUAL_STATES } from "./states";
+export type { VisualState } from "./states";
+export { VARIANTS } from "./variants";
+export type { VariantName } from "./variants";
