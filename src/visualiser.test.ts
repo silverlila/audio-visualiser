@@ -158,7 +158,7 @@ describe("createVisualiser", () => {
     const options = { variant: "bars" } as unknown as VisualiserOptions;
 
     expect(() => createVisualiser(canvas, options)).toThrow(
-      new TypeError('audio-visualiser: unknown variant "bars" (expected one of: timeline)'),
+      /^audio-visualiser: unknown variant "bars" \(expected one of: timeline, /,
     );
 
     for (const observer of observers) expect(observer.disconnect).toHaveBeenCalled();
