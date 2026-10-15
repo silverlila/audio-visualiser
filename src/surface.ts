@@ -13,7 +13,9 @@ export interface Surface {
   /** Document visible && canvas intersecting && width * height > 0. */
   readonly active: boolean;
   readonly reducedMotion: boolean;
-  /** Live computed style: ink = `color`, accent = `--av-accent` trimmed, or ink when empty. Reused object. */
+  /** Live computed style: ink = `color`, accent = `--av-accent` trimmed, or ink when empty. When the
+   *  computed `color` is empty (a detached canvas), ink keeps its last value, or `#000` before any.
+   *  Reused object. */
   readColors(): SurfaceColors;
   /** If the backing store differs from the observed device-pixel size, resize it;
    *  then scale the transform so drawing is in CSS px, and clear. */
@@ -25,6 +27,9 @@ export interface Surface {
    *  and restores the inline `contain`. */
   dispose(): void;
 }
+
+/** Ink before the canvas has ever computed a colour. */
+const FALLBACK_INK = "#000";
 
 interface Size {
   readonly width: number;
@@ -57,7 +62,7 @@ export function createSurface(canvas: HTMLCanvasElement, onActiveChange: () => v
   let intersecting = false;
   let active = false;
   let disposed = false;
-  const colors = { ink: "", accent: "" };
+  const colors = { ink: FALLBACK_INK, accent: FALLBACK_INK };
   const motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
 
   // Size containment stops a canvas without CSS size from growing each time its
@@ -120,7 +125,8 @@ export function createSurface(canvas: HTMLCanvasElement, onActiveChange: () => v
     },
     readColors() {
       const style = getComputedStyle(canvas);
-      colors.ink = style.color;
+      // A detached canvas computes `color` as "", which canvas gradients reject.
+      if (style.color !== "") colors.ink = style.color;
       colors.accent = style.getPropertyValue("--av-accent").trim() || colors.ink;
       return colors;
     },
