@@ -219,3 +219,4 @@ pnpm build && test -f dist/index.js && test -f dist/react.js && test -f dist/ind
   declaration bundler. Decide before publishing.
 
 ## Landed
+01. ✔ 8 files. `pnpm test` ran 20 tests in 2 files, all passing (RMS of a full-scale sine = 1/√2, envelope depends on elapsed ms not call count, fixed clock ticks the same at 60 and 120 Hz); `pnpm typecheck` clean. Carried should-fix: `history.at()` returns undefined for fractional ages; `stepFixedClock`/`stepEnvelope` propagate a NaN dt.
