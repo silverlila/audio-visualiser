@@ -10,3 +10,4 @@ line worth less. Coding standards belong in a skill, not here.
 - `vitest run` hides `console.log` from passing tests here; add `--silent=false --reporter=verbose` while debugging.
 - jsdom computes `getComputedStyle(el).color` as `rgb(0, 0, 0)` for a detached element where browsers return `""`; tests of colour reading must stub `getComputedStyle` (see `src/surface.test.ts`).
 - Port 5173 is often taken by another local Vite app; for browser checks run `pnpm dev --port 5199 --strictPort` and stop it afterwards.
+- Don't link this repo into an app (`pnpm add ../audio-visualiser`): its devDependency React becomes a second copy. `pnpm pack` and install the `.tgz` (it holds only `dist/`).
