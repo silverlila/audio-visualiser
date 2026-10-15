@@ -7,13 +7,13 @@ function App() {
 
   const SpeechAPI = useSpeechToText();
   const AudioAPI = useAudioVisualiser(canvasRef);
-  console.log("re-rendering");
   return (
     <React.Fragment>
       <canvas ref={canvasRef} width="800" height="50"></canvas>
       <br />
 
-      {SpeechAPI.isListening && <p>{SpeechAPI.transcript}</p>}
+      <p>{SpeechAPI.transcript}</p>
+      <p>{SpeechAPI.interimTranscript}</p>
       <button
         onClick={() => {
           SpeechAPI.start();

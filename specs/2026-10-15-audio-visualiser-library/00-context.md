@@ -220,3 +220,4 @@ pnpm build && test -f dist/index.js && test -f dist/react.js && test -f dist/ind
 
 ## Landed
 01. ✔ 8 files. `pnpm test` ran 20 tests in 2 files, all passing (RMS of a full-scale sine = 1/√2, envelope depends on elapsed ms not call count, fixed clock ticks the same at 60 and 120 Hz); `pnpm typecheck` clean. Carried should-fix: `history.at()` returns undefined for fractional ages; `stepFixedClock`/`stepEnvelope` propagate a NaN dt.
+02. ✔ 18 files. App moved to `playground/` (Vite root, `audio-visualiser` alias resolves to `src/index.ts`), tsconfig split into lib/playground; `pnpm typecheck && pnpm lint && pnpm test` exit 0 — lint now zero warnings, 24 tests incl. `appendFinal accumulates text across results`. Carried should-fix: `discard()` uses `stop()` so a pending final result can refill the cleared transcript (`abort()` would not).
