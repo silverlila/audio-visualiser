@@ -1,32 +1,22 @@
 import React from "react";
-import { createMicrophone, createVisualiser, microphoneVisualState } from "audio-visualiser";
+import { AudioVisualiser, microphoneVisualState, useMicrophone } from "audio-visualiser/react";
 import { useSpeechToText } from "./useSpeechToText";
 
 function App() {
-  const canvasRef = React.useRef<HTMLCanvasElement>(null);
-  const [mic] = React.useState(() => createMicrophone());
-  const [snap, setSnap] = React.useState(() => mic.getSnapshot());
+  const mic = useMicrophone();
   const SpeechAPI = useSpeechToText();
-
-  React.useEffect(() => {
-    const canvas = canvasRef.current;
-    if (canvas === null) return;
-    const vis = createVisualiser(canvas);
-    const unsubscribe = mic.subscribe((next) => {
-      setSnap(next);
-      vis.update({ stream: next.stream, state: microphoneVisualState(next), variant: "timeline" });
-    });
-    return () => {
-      unsubscribe();
-      vis.destroy();
-    };
-  }, [mic]);
 
   return (
     <React.Fragment>
-      <canvas ref={canvasRef} style={{ display: "block", width: "100%", height: 64, color: "CanvasText" }} />
+      <AudioVisualiser
+        stream={mic.stream}
+        state={microphoneVisualState(mic)}
+        variant="timeline"
+        aria-label="Microphone level"
+        style={{ height: 64, color: "CanvasText" }}
+      />
 
-      {snap.error !== null && <p role="alert">{snap.error.message}</p>}
+      {mic.error !== null && <p role="alert">{mic.error.message}</p>}
       <p>{SpeechAPI.transcript}</p>
       <p>{SpeechAPI.interimTranscript}</p>
       <button
