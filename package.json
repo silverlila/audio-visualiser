@@ -1,6 +1,6 @@
 {
   "name": "@silverlila/audio-visualiser",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Canvas visualiser for live microphone audio, with React bindings",
   "license": "MIT",
   "repository": {
@@ -12,7 +12,9 @@
     "access": "public"
   },
   "type": "module",
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "sideEffects": false,
   "exports": {
     ".": {
