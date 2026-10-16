@@ -5,39 +5,28 @@ import { STATE_TAU_MS, createStateWeights, stepStateWeights } from "./states";
 import type { StateWeights, VisualState } from "./states";
 
 export const SAMPLE_PERIOD_MS = 45;
-export const HISTORY_CAPACITY = 512; // ~23 s of timeline
+export const HISTORY_CAPACITY = 512;
 export const ATTACK_MS = 25;
 export const RELEASE_MS = 250;
-export const MAX_GAP_MS = 250; // a frame gap longer than this drops the clock backlog
+export const MAX_GAP_MS = 250;
 
 export interface DisplayInput {
   readonly target: VisualState;
-  /** 0..1 un-smoothed; 0 when there is no stream. */
   readonly loudness: number;
-  /** 0..1 per band, length >= bandCount; null -> bands decay to 0. */
   readonly bandTargets: ArrayLike<number> | null;
   readonly reducedMotion: boolean;
 }
 
 export interface Display {
-  /** Enveloped loudness. */
   readonly level: number;
-  /** Enveloped, length === bandCount. */
   readonly bands: Float32Array;
-  /** Enveloped level sampled every SAMPLE_PERIOD_MS. */
   readonly history: HistoryView;
   readonly weights: StateWeights;
-  /** Advances with dt; frozen while reducedMotion. */
   readonly ambientMs: number;
-  /** Advances every smoothing step by dtMs. Allocates nothing.
-   *  A dtMs that is not a positive finite number changes nothing. */
   step(input: DisplayInput, dtMs: number): void;
-  /** Reallocates bands (only when n changes); new bands start at 0. */
   setBandCount(n: number): void;
 }
 
-/** The one owner of every time-based smoothing step, so motion depends on elapsed
- *  milliseconds and never on how often `step` is called. */
 export function createDisplay(bandCount: number, initial: VisualState): Display {
   let level = 0;
   let bands = new Float32Array(bandCount);

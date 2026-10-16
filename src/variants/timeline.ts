@@ -5,12 +5,10 @@ const BAR_WIDTH = 3;
 const BAR_STEP = 5;
 const MIN_HEIGHT = 2;
 const BREATHE_DEPTH = 0.15;
-const BREATHE_RATE = 1 / 600; // radians per ms
-const BREATHE_SPREAD = 0.35; // radians between neighbouring bars
+const BREATHE_RATE = 1 / 600;
+const BREATHE_SPREAD = 0.35;
 const DIM_ALPHA = 0.35;
 
-/** Superwhisper-style scrolling history: the newest bar at the right edge, older bars to its
- *  left, all shifted by the scroll phase so the motion is continuous between samples. */
 function draw(ctx: CanvasRenderingContext2D, frame: Frame): void {
   const { width, height, history, mix, ambientMs } = frame;
   const barCount = Math.ceil(width / BAR_STEP) + 1;

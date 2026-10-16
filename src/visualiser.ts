@@ -21,21 +21,20 @@ import type { VariantName } from "./variants";
 import type { Frame } from "./variants/frame";
 
 export interface VisualiserOptions {
-  /** The caller owns it; never stopped here. */
+  /** The caller owns the stream; the visualiser never stops its tracks. */
   readonly stream?: MediaStream | null;
   /** Default: "recording" when stream is set, else "idle". */
   readonly state?: VisualState;
-  /** Default "timeline". */
+  /** Default: "timeline". */
   readonly variant?: VariantName;
-  /** Default defaultLabel(resolved state). */
+  /** The canvas's aria-label. Default: a description of the state. */
   readonly label?: string;
 }
 
 export interface Visualiser {
-  /** Replaces all options (omitted -> default). Equal values are no-ops.
-   *  Throws Error("audio-visualiser: update() after destroy()") after destroy. */
+  /** Replaces all options; an omitted option returns to its default. Throws after destroy(). */
   update(options?: VisualiserOptions): void;
-  /** Idempotent: releases the tap, cancels rAF, disposes the surface. */
+  /** Idempotent. Stops drawing and clears the canvas; the stream keeps running. */
   destroy(): void;
 }
 
@@ -48,14 +47,12 @@ interface ResolvedOptions {
 
 type Writable<T> = { -readonly [K in keyof T]: T[K] };
 
-/** Options arrive from untyped callers too; an unknown name would fail deep inside a frame. */
 function assertOneOf(option: string, value: string, allowed: readonly string[]): void {
   if (!allowed.includes(value)) {
     throw new TypeError(`audio-visualiser: unknown ${option} "${value}" (expected one of: ${allowed.join(", ")})`);
   }
 }
 
-/** Throws TypeError on an unknown `state` or `variant`. */
 function resolveOptions(options: VisualiserOptions): ResolvedOptions {
   const stream = options.stream ?? null;
   const state = options.state ?? (stream === null ? "idle" : "recording");
@@ -107,8 +104,6 @@ export function createVisualiser(canvas: HTMLCanvasElement, options: VisualiserO
     mix,
     ambientMs: 0,
   };
-  // Last allocation: from here on, any throw must go through destroy() so the surface's
-  // observers and listeners are released.
   const surface = createSurface(canvas, syncLoop);
 
   function syncTap(stream: MediaStream | null): void {
@@ -148,7 +143,7 @@ export function createVisualiser(canvas: HTMLCanvasElement, options: VisualiserO
   function syncLoop(): void {
     if (surface.active && !destroyed) {
       if (rafId !== null) return;
-      lastTime = null; // resume without catching up on the time spent inactive
+      lastTime = null;
       rafId = requestAnimationFrame(renderFrame);
     } else if (rafId !== null) {
       cancelAnimationFrame(rafId);
@@ -209,7 +204,6 @@ export function createVisualiser(canvas: HTMLCanvasElement, options: VisualiserO
   try {
     apply(current);
   } catch (error) {
-    // Leave nothing attached to a canvas whose visualiser the caller never received.
     visualiser.destroy();
     throw error;
   }

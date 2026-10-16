@@ -9,7 +9,6 @@ export function useMicrophone(options?: MicrophoneOptions): UseMicrophoneResult 
   const [mic] = useState(() => createMicrophone(options));
   const snapshot = useSyncExternalStore(mic.subscribe, mic.getSnapshot, mic.getSnapshot);
 
-  // Under StrictMode this also stops a microphone that was never started, which is a no-op.
   useEffect(() => () => mic.stop(), [mic]);
 
   return useMemo(() => ({ ...snapshot, start: mic.start, stop: mic.stop }), [snapshot, mic]);

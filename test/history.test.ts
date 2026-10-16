@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { createHistory } from "./history";
+import { createHistory } from "../src/history";
 
 describe("history", () => {
   it("history at(age) returns newest first and wraps", () => {

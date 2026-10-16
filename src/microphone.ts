@@ -26,7 +26,7 @@ export type MicrophoneSnapshot = MicrophoneStatus & { readonly devices: readonly
 export interface MicrophoneOptions {
   /** Merged over the defaults { echoCancellation: true, noiseSuppression: true, autoGainControl: true }. Read once at creation. */
   readonly audio?: Omit<MediaTrackConstraints, "deviceId">;
-  /** Test seam. Default: navigator.mediaDevices, read lazily on first use (never at import or creation). */
+  /** For tests. Defaults to navigator.mediaDevices, read on first use, never at import or creation. */
   readonly mediaDevices?: MediaDevices;
 }
 
@@ -89,7 +89,6 @@ function errorName(cause: unknown): string | null {
   return typeof cause.name === "string" ? cause.name : null;
 }
 
-/** Maps a getUserMedia failure (a DOMException, or anything with a `name`) to a MicrophoneError. */
 function toMicrophoneError(cause: unknown): MicrophoneError {
   const name = errorName(cause);
   const kind = (name !== null ? ERROR_KIND_BY_NAME.get(name) : undefined) ?? "unknown";
@@ -110,7 +109,6 @@ async function listAudioInputs(mediaDevices: MediaDevices): Promise<MicrophoneDe
   return all.filter((d) => d.kind === "audioinput").map((d) => ({ id: d.deviceId, label: d.label }));
 }
 
-/** The pending getUserMedia call; meaningful only while status is "requesting". */
 interface InFlight {
   readonly deviceId: string | undefined;
   readonly promise: Promise<MicrophoneSnapshot>;
@@ -150,7 +148,6 @@ export function createMicrophone(options: MicrophoneOptions = {}): Microphone {
     commit({ ...snapshot, devices });
   }
 
-  /** Fire-and-forget. A result older than the latest refresh is dropped; a failure keeps the previous list and warns. */
   function refreshDevices(mediaDevices: MediaDevices): void {
     const refresh = ++latestRefresh;
     listAudioInputs(mediaDevices).then(
@@ -167,7 +164,6 @@ export function createMicrophone(options: MicrophoneOptions = {}): Microphone {
     if (watched !== null) refreshDevices(watched);
   }
 
-  /** Ends the current generation: a pending request is superseded and a live stream is stopped. */
   function release(): void {
     generation++;
     inFlight = null;
@@ -228,8 +224,6 @@ export function createMicrophone(options: MicrophoneOptions = {}): Microphone {
       return Promise.resolve(snapshot);
     }
 
-    // The request is registered before `requesting` is emitted, so a listener that calls
-    // start() deduplicates onto it and one that calls stop() supersedes it.
     release();
     const promise = request(mediaDevices, deviceId, generation);
     inFlight = { deviceId, promise };

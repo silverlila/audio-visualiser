@@ -1,12 +1,11 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import type { createVisualiser as CreateVisualiser, VisualiserOptions } from "./visualiser";
+import type { createVisualiser as CreateVisualiser, VisualiserOptions } from "../src/visualiser";
 
 function fakeAudioNode() {
   return { connect: vi.fn(), disconnect: vi.fn() };
 }
 
-/** The parts of AudioContext that the audio graph uses. */
 function fakeAudioContextClass() {
   const createMediaStreamSource = vi.fn(() => fakeAudioNode());
   const suspend = vi.fn(() => Promise.resolve());
@@ -39,7 +38,6 @@ class FakeObserver {
   }
 }
 
-/** The CanvasRenderingContext2D methods the surface and renderers call, as no-ops. */
 function fakeCanvasContext(): CanvasRenderingContext2D {
   const ctx = {
     setTransform: vi.fn(),
@@ -73,9 +71,8 @@ beforeEach(async () => {
   vi.stubGlobal("matchMedia", () => ({ matches: false, addEventListener: vi.fn(), removeEventListener: vi.fn() }));
   vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockImplementation(fakeCanvasContext);
 
-  // audio-graph keeps one AudioContext per module instance; a fresh import gives each test its own.
   vi.resetModules();
-  ({ createVisualiser } = await import("./visualiser"));
+  ({ createVisualiser } = await import("../src/visualiser"));
   canvas = document.createElement("canvas");
 });
 

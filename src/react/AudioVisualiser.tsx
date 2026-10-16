@@ -1,3 +1,12 @@
+/**
+ * The React binding: a canvas component that creates one visualiser when its canvas mounts and
+ * passes prop changes on to it.
+ *
+ * React attaches a canvas ref before the component's layout effects run, so the ref callback only
+ * sees options from an earlier commit. The first render's options seed `optionsRef`, and any later
+ * re-attach (StrictMode, a revealed `<Activity>`) is corrected by the update effect in the same
+ * commit, before the first frame.
+ */
 import { useCallback, useLayoutEffect, useRef } from "react";
 import type { ComponentPropsWithRef, ReactElement, Ref } from "react";
 import { createVisualiser } from "../index";
@@ -7,7 +16,6 @@ export type AudioVisualiserProps =
   Omit<ComponentPropsWithRef<"canvas">, "children" | "width" | "height" | "role">
   & Pick<VisualiserOptions, "stream" | "state" | "variant">;
 
-/** Points `ref` at `value` and returns the matching detach. */
 function attachRef<T>(ref: Ref<T> | undefined, value: T): () => void {
   if (typeof ref === "function") {
     const cleanup = ref(value);
@@ -31,10 +39,6 @@ export function AudioVisualiser({
   style,
   ...rest
 }: AudioVisualiserProps): ReactElement {
-  // React attaches the canvas ref before this component's layout effects run, so the ref
-  // callback can only see options from an earlier commit. Seeding with the first render's
-  // options makes the first mount exact; the update effect below corrects any later re-attach
-  // (StrictMode, a revealed <Activity>) in the same commit, before the first frame is drawn.
   const optionsRef = useRef<VisualiserOptions>({ stream, state, variant, label });
   const visRef = useRef<Visualiser | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -56,8 +60,6 @@ export function AudioVisualiser({
     visRef.current?.update(options);
   }, [stream, state, variant, label]);
 
-  // The caller's ref lives in its own effect so that a new ref identity (an inline callback)
-  // re-points the ref without destroying the visualiser and its history.
   useLayoutEffect(() => {
     const canvas = canvasRef.current;
     if (canvas === null) return;

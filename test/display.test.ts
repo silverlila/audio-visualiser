@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { createDisplay } from "./display";
-import type { Display, DisplayInput } from "./display";
+import { createDisplay } from "../src/display";
+import type { Display, DisplayInput } from "../src/display";
 
 const QUIET: DisplayInput = { target: "idle", loudness: 0, bandTargets: null, reducedMotion: false };
 
@@ -29,7 +29,6 @@ describe("display", () => {
     run(at60, input, 2000, 16.667);
     run(at120, input, 2000, 8.333);
 
-    // 2000 ms / 45 ms per sample = 44.4 samples.
     expect(at60.history.length).toBe(44);
     expect(Math.abs(at60.history.length - at120.history.length)).toBeLessThanOrEqual(1);
   });

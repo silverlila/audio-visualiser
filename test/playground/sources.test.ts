@@ -1,7 +1,12 @@
+/**
+ * Tests for the playground's tone and file audio sources.
+ *
+ * In browsers, `play()` rejects with its own error unless `pause()` first rejects it with an
+ * AbortError; `stubAudioElement` reproduces that.
+ */
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { createFileSource, createToneSource } from "./sources";
+import { createFileSource, createToneSource } from "../../playground/sources";
 
-/** The parts of AudioContext that the tone source uses. */
 function fakeAudioContext() {
   const stream = { id: "tone-stream" };
   const oscillators: { start: ReturnType<typeof vi.fn>; stop: ReturnType<typeof vi.fn> }[] = [];
@@ -22,7 +27,6 @@ function fakeAudioContext() {
   return { ctx, stream, oscillators };
 }
 
-/** The parts of AudioContext that the file source uses. */
 function fakeFileAudioContext() {
   const node = () => ({ connect: vi.fn() });
   return {
@@ -33,7 +37,6 @@ function fakeFileAudioContext() {
   } as unknown as AudioContext;
 }
 
-/** Stubs the browser's <audio> element; `play()` rejects with `playError`, pausing first with an AbortError. */
 function stubAudioElement(playError: Error) {
   vi.stubGlobal("URL", { createObjectURL: () => "blob:fake", revokeObjectURL: vi.fn() });
   vi.stubGlobal(

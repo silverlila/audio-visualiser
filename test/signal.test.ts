@@ -9,7 +9,7 @@ import {
   rms,
   stepEnvelope,
   stepFixedClock,
-} from "./signal";
+} from "../src/signal";
 
 describe("loudness", () => {
   it("rms of a full-scale sine is 1/sqrt(2)", () => {
@@ -27,7 +27,6 @@ describe("loudness", () => {
   });
 
   it("normalizeDb clamps to 0..1", () => {
-    // LOUDNESS_RANGE is -60..-10 dBFS.
     expect(normalizeDb(-60, LOUDNESS_RANGE)).toBe(0);
     expect(normalizeDb(-10, LOUDNESS_RANGE)).toBe(1);
     expect(normalizeDb(-35, LOUDNESS_RANGE)).toBe(0.5);
@@ -46,7 +45,6 @@ describe("envelope", () => {
   });
 
   it("stepEnvelope attacks faster than it releases", () => {
-    // 1 - exp(-16/25) and 1 - exp(-16/250).
     const rise = stepEnvelope(0, 1, 16, 25, 250);
     const fall = 1 - stepEnvelope(1, 0, 16, 25, 250);
     expect(rise).toBeCloseTo(0.4727, 4);
@@ -77,7 +75,6 @@ describe("bands", () => {
   });
 
   it("logBandLayout spans 80 Hz to 8 kHz in bins", () => {
-    // 48000 / 2048 = 23.4375 Hz per bin: 80 Hz is bin 3, 8000 Hz is bin 341.
     const layout = logBandLayout(8, 80, 8000, 48000, 2048);
     expect(layout.startBin[0]).toBe(3);
     expect(layout.endBin[7]).toBe(341);
@@ -121,7 +118,6 @@ describe("fixed clock", () => {
   }
 
   it("stepFixedClock ticks the same at 60 Hz and 120 Hz", () => {
-    // 1000 ms / 45 ms = 22 whole periods.
     expect(ticksOverOneSecond(16.667, 60)).toBe(22);
     expect(ticksOverOneSecond(8.333, 120)).toBe(22);
   });
@@ -131,7 +127,6 @@ describe("fixed clock", () => {
     expect(stepFixedClock(clock, 30, 45, 250)).toBe(0);
     expect(stepFixedClock(clock, 5000, 45, 250)).toBe(0);
     expect(clock.carryMs).toBe(0);
-    // Had the 30 ms carry survived, this step would complete a period.
     expect(stepFixedClock(clock, 20, 45, 250)).toBe(0);
     expect(stepFixedClock(clock, 25, 45, 250)).toBe(1);
   });

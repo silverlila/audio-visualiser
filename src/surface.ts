@@ -1,3 +1,13 @@
+/**
+ * The canvas a visualiser draws on: its CSS and backing-store sizes, whether it is visible, the
+ * colours it takes from CSS, and its accessibility attributes.
+ *
+ * A detached canvas computes `color` as "", and canvas gradients reject that, so ink keeps its
+ * last good value. Safari lacks `devicePixelContentBoxSize` and rejects the
+ * `device-pixel-content-box` observe option, so the backing size falls back to the content box ×
+ * devicePixelRatio. A canvas with no CSS size grows each time its backing store is resized;
+ * `contain: size` makes it fall back to the default object size instead.
+ */
 import type { VisualState } from "./states";
 
 export interface SurfaceColors {
@@ -7,28 +17,17 @@ export interface SurfaceColors {
 
 export interface Surface {
   readonly ctx: CanvasRenderingContext2D;
-  /** CSS px, from the ResizeObserver. */
   readonly width: number;
   readonly height: number;
-  /** Document visible && canvas intersecting && width * height > 0. */
   readonly active: boolean;
   readonly reducedMotion: boolean;
-  /** Live computed style: ink = `color`, accent = `--av-accent` trimmed, or ink when empty. When the
-   *  computed `color` is empty (a detached canvas), ink keeps its last value, or `#000` before any.
-   *  Reused object. */
   readColors(): SurfaceColors;
-  /** If the backing store differs from the observed device-pixel size, resize it;
-   *  then scale the transform so drawing is in CSS px, and clear. */
   beginFrame(): void;
-  /** Writes role="img", aria-label, data-state — only when they differ from the current values. */
   setAccessibility(state: VisualState, label: string): void;
   clear(): void;
-  /** Idempotent. Disconnects observers and listeners, clears, removes role/aria-label/data-state
-   *  and restores the inline `contain`. */
   dispose(): void;
 }
 
-/** Ink before the canvas has ever computed a colour. */
 const FALLBACK_INK = "#000";
 
 interface Size {
@@ -36,7 +35,6 @@ interface Size {
   readonly height: number;
 }
 
-/** Backing-store pixels for one resize entry. Safari has no devicePixelContentBoxSize. */
 function devicePixelSize(entry: ResizeObserverEntry, cssBox: ResizeObserverSize): Size {
   if ("devicePixelContentBoxSize" in entry && entry.devicePixelContentBoxSize.length > 0) {
     const box = entry.devicePixelContentBoxSize[0];
@@ -50,7 +48,6 @@ function setAttributeIfChanged(element: Element, name: string, value: string): v
   if (element.getAttribute(name) !== value) element.setAttribute(name, value);
 }
 
-/** Throws Error("audio-visualiser: canvas has no 2D context") if getContext("2d") is null. */
 export function createSurface(canvas: HTMLCanvasElement, onActiveChange: () => void): Surface {
   const ctx = canvas.getContext("2d");
   if (ctx === null) throw new Error("audio-visualiser: canvas has no 2D context");
@@ -65,8 +62,6 @@ export function createSurface(canvas: HTMLCanvasElement, onActiveChange: () => v
   const colors = { ink: FALLBACK_INK, accent: FALLBACK_INK };
   const motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
 
-  // Size containment stops a canvas without CSS size from growing each time its
-  // backing store is resized: it falls back to the default object size instead.
   const previousContain = canvas.style.contain;
   canvas.style.contain = "size";
 
@@ -90,7 +85,6 @@ export function createSurface(canvas: HTMLCanvasElement, onActiveChange: () => v
   try {
     resizeObserver.observe(canvas, { box: "device-pixel-content-box" });
   } catch {
-    // Safari rejects the device-pixel box; devicePixelSize() then derives it from devicePixelRatio.
     resizeObserver.observe(canvas, { box: "content-box" });
   }
 
@@ -125,7 +119,6 @@ export function createSurface(canvas: HTMLCanvasElement, onActiveChange: () => v
     },
     readColors() {
       const style = getComputedStyle(canvas);
-      // A detached canvas computes `color` as "", which canvas gradients reject.
       if (style.color !== "") colors.ink = style.color;
       colors.accent = style.getPropertyValue("--av-accent").trim() || colors.ink;
       return colors;

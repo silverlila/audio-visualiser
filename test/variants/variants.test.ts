@@ -1,17 +1,16 @@
 import { describe, it, expect } from "vitest";
-import { createHistory } from "../history";
-import { createStateMix, createStateWeights, stateMix, VISUAL_STATES } from "../states";
-import type { StateWeights } from "../states";
-import type { Frame } from "./frame";
-import { RENDERERS, VARIANTS } from "./index";
-import type { VariantName } from "./index";
+import { createHistory } from "../../src/history";
+import { createStateMix, createStateWeights, stateMix, VISUAL_STATES } from "../../src/states";
+import type { StateWeights } from "../../src/states";
+import type { Frame } from "../../src/variants/frame";
+import { RENDERERS, VARIANTS } from "../../src/variants/index";
+import type { VariantName } from "../../src/variants/index";
 
 interface Call {
   readonly name: string;
   readonly args: readonly unknown[];
 }
 
-/** A 2D context that records every method call and property write, as "set <prop>". */
 function recordingContext(): { ctx: CanvasRenderingContext2D; calls: Call[] } {
   const calls: Call[] = [];
   const gradient = {
@@ -38,7 +37,6 @@ function recordingContext(): { ctx: CanvasRenderingContext2D; calls: Call[] } {
   return { ctx: proxy as unknown as CanvasRenderingContext2D, calls };
 }
 
-/** Arguments a real canvas rejects (by throwing or silently ignoring the call). */
 function invalidArguments(calls: readonly Call[]): string[] {
   const problems: string[] = [];
   for (const { name, args } of calls) {
@@ -67,15 +65,12 @@ interface Box {
 interface Paint {
   readonly kind: "fill" | "stroke";
   readonly alpha: number;
-  /** Bounds of the path's geometry: arcs count as their whole circle, curves by their control points. */
   readonly path: Box;
-  /** The pixels the paint can touch: the path grown by half the line width for a stroke. */
   readonly ink: Box;
 }
 
 interface Replay {
   readonly paints: readonly Paint[];
-  /** Context state left changed or changed outside a save/restore pair. */
   readonly leaks: readonly string[];
 }
 
@@ -90,8 +85,6 @@ function extend(box: Box, x: number, y: number): void {
   box.maxY = Math.max(box.maxY, y);
 }
 
-/** Plays the recorded calls back through a model of the canvas: the save/restore stack, the
- *  alpha and line width in force, and the bounds of the current path at each fill and stroke. */
 function replay(calls: readonly Call[]): Replay {
   const paints: Paint[] = [];
   const leaks: string[] = [];
@@ -135,8 +128,6 @@ function replay(calls: readonly Call[]): Replay {
   return { paints, leaks };
 }
 
-/** A visible paint big enough to see: a fill at least 1 px in both directions, or a stroke whose
- *  path spans at least 1 px. */
 function hasRealExtent({ kind, alpha, path }: Paint): boolean {
   if (alpha <= 0) return false;
   const w = path.maxX - path.minX;
@@ -157,7 +148,6 @@ const SIZES = [
   [64, 24],
 ] as const;
 
-/** Containers animating open from 0 pass through sizes under 1 px. */
 const SUB_PIXEL_SIZES = [
   [0.5, 0.5],
   [0.5, 24],
@@ -166,7 +156,6 @@ const SUB_PIXEL_SIZES = [
 
 const AMBIENT_MS = [0, 12_345.6];
 
-/** Halfway through a transition from recording to processing. */
 const MID_TRANSITION: StateWeights = { ...createStateWeights("recording"), recording: 0.5, processing: 0.5 };
 
 function makeFrame(
@@ -201,7 +190,6 @@ function makeFrame(
   };
 }
 
-/** Every combination of variant, size, state (plus one mid-transition blend) and ambient time. */
 function* cases(
   sizes: readonly (readonly [number, number])[] = SIZES,
 ): Generator<{ label: string; variant: VariantName; frame: Frame }> {
@@ -222,7 +210,6 @@ function* cases(
   }
 }
 
-/** Every pure state, and every pair of states crossfading just after the start and halfway. */
 function crossfades(): [string, StateWeights][] {
   const blends: [string, StateWeights][] = VISUAL_STATES.map((s) => [s, createStateWeights(s)]);
   for (const from of VISUAL_STATES) {
@@ -239,10 +226,8 @@ function crossfades(): [string, StateWeights][] {
   return blends;
 }
 
-/** Ambient times that put the slow breathing sines at their peak as well as elsewhere. */
 const PEAK_AMBIENT_MS = [0, 12_345.6, 700 * (Math.PI / 2), 600 * (Math.PI / 2)];
 
-/** The timeline scrolls its history off the left edge by design, so it is not held to the bounds. */
 const BOUNDED_VARIANTS = VARIANTS.filter((v) => v !== "timeline");
 
 describe("variants", () => {
@@ -330,14 +315,12 @@ describe("variants", () => {
   });
 
   describe("line", () => {
-    /** A 200-sample sine at speech-like amplitude, starting `phase` radians into its cycle. */
     function speech(amplitude: number, phase: number): Float32Array {
       const samples = new Float32Array(2048);
       for (let i = 0; i < samples.length; i++) samples[i] = amplitude * Math.sin((2 * Math.PI * i) / 200 + phase);
       return samples;
     }
 
-    /** The y of every point the trace passes through (curve end points included). */
     function traceYs(waveform: Float32Array, level: number): number[] {
       const frame = { ...makeFrame("line", 300, 64, createStateWeights("recording"), 0), waveform, level };
       const { ctx, calls } = recordingContext();

@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
-import { createMicrophone, microphoneVisualState } from "./microphone";
-import type { MicrophoneSnapshot } from "./microphone";
+import { createMicrophone, microphoneVisualState } from "../src/microphone";
+import type { MicrophoneSnapshot } from "../src/microphone";
 
 function fakeTrack(deviceId: string) {
   const endedListeners: (() => void)[] = [];
@@ -11,7 +11,6 @@ function fakeTrack(deviceId: string) {
     addEventListener: (type: string, listener: () => void) => {
       if (type === "ended") endedListeners.push(listener);
     },
-    /** Simulates the device being unplugged. */
     end: () => {
       for (const listener of endedListeners) listener();
     },
@@ -37,7 +36,6 @@ interface PendingRequest {
   reject(cause: unknown): void;
 }
 
-/** The parts of MediaDevices that createMicrophone uses; getUserMedia settles only when the test says so. */
 function fakeMediaDevices() {
   const requests: PendingRequest[] = [];
   const deviceChangeListeners = new Set<() => void>();
@@ -76,7 +74,6 @@ function lastRequest(requests: PendingRequest[]): PendingRequest {
   return request;
 }
 
-/** Lets fire-and-forget work (device refreshes) settle. */
 function flush(): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, 0));
 }
@@ -284,7 +281,7 @@ describe("createMicrophone", () => {
 
     devices.fireDeviceChange();
     await flush();
-    expect(seen).toHaveLength(2); // an unchanged list emits nothing
+    expect(seen).toHaveLength(2);
 
     unsubscribe();
     expect(devices.deviceChangeListenerCount()).toBe(0);
@@ -326,7 +323,6 @@ describe("createMicrophone", () => {
     expect(stream.track.stop).toHaveBeenCalled();
   });
 
-  // An unhandled rejection here fails the vitest run, so this also guards against one.
   it("a failing device list keeps the previous list and warns", async () => {
     const devices = fakeMediaDevices();
     const mic = createMicrophone({ mediaDevices: devices.mediaDevices });

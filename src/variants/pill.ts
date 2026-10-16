@@ -1,10 +1,8 @@
 import { roundedBar, SHIMMER_PERIOD_MS } from "./draw";
 import type { Frame, Variant } from "./frame";
 
-/** Band read by each bar, left to right: the lowest band in the middle, rising outward. */
 const BAND_FOR_BAR = [3, 1, 0, 2, 4] as const;
 
-// Sizes as fractions of the unit, which is the height unless the canvas is too narrow.
 const DOT = 0.28;
 const DOT_GAP = 0.16;
 const BAR_WIDTH = 0.12;
@@ -13,16 +11,13 @@ const BAR_REACH = 0.9;
 const GROUP_WIDTH = DOT + DOT_GAP + BAND_FOR_BAR.length * BAR_WIDTH + (BAND_FOR_BAR.length - 1) * BAR_GAP;
 
 const BREATHE_DEPTH = 0.2;
-const BREATHE_RATE = 1 / 600; // radians per ms
-const BREATHE_SPREAD = 0.9; // radians between neighbouring bars
+const BREATHE_RATE = 1 / 600;
+const BREATHE_SPREAD = 0.9;
 const PULSE_DEPTH = 0.65;
 
-/** Compact mini-view: an accent status dot followed by five rounded bars, centred as a group. */
 function draw(ctx: CanvasRenderingContext2D, frame: Frame): void {
   const { width, height, bands, mix, ambientMs } = frame;
   const unit = Math.min(height, width / GROUP_WIDTH);
-  // Whole-pixel bars and spacing, rounded down so the group fits in unit · GROUP_WIDTH (until the
-  // 1 px minimums take over on a canvas too small to matter).
   const barWidth = Math.max(1, Math.floor(BAR_WIDTH * unit));
   const barStep = Math.max(barWidth + 1, Math.floor((BAR_WIDTH + BAR_GAP) * unit));
   const barsOffset = Math.floor((DOT + DOT_GAP) * unit);

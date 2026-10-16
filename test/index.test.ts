@@ -1,9 +1,9 @@
 import { describe, it, expect } from "vitest";
-import { RENDERERS } from "./variants";
+import { RENDERERS } from "../src/variants";
 
 describe("core entry", () => {
   it("core entry imports in Node and exports the public surface", async () => {
-    const core = await import("./index");
+    const core = await import("../src/index");
 
     expect(core.VARIANTS).toEqual(["timeline", "pill", "spectrum", "line", "orb", "radial"]);
     expect(core.VISUAL_STATES).toEqual(["idle", "connecting", "recording", "processing", "done", "error"]);
@@ -13,7 +13,7 @@ describe("core entry", () => {
   });
 
   it("every variant declares a non-negative integer band count", async () => {
-    const { VARIANTS } = await import("./index");
+    const { VARIANTS } = await import("../src/index");
 
     for (const name of VARIANTS) {
       expect(Number.isInteger(RENDERERS[name].bands), name).toBe(true);

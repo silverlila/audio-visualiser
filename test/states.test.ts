@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { VISUAL_STATES, createStateMix, createStateWeights, stateMix, stepStateWeights } from "./states";
+import { VISUAL_STATES, createStateMix, createStateWeights, stateMix, stepStateWeights } from "../src/states";
 
 describe("state weights", () => {
   it("state weights sum to 1 throughout a transition", () => {

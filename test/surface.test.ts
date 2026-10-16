@@ -1,14 +1,18 @@
 // @vitest-environment jsdom
+/**
+ * Tests for how the surface reads its ink and accent colours from the canvas's computed style.
+ *
+ * Browsers report `color: ""` for a detached canvas's computed style; jsdom doesn't, so these
+ * tests fake the computed style.
+ */
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { createSurface } from "./surface";
+import { createSurface } from "../src/surface";
 
 class FakeObserver {
   observe = vi.fn();
   disconnect = vi.fn();
 }
 
-/** What the browser's computed style reports. A detached canvas reports `color: ""` in browsers,
- *  which jsdom does not reproduce, so the computed style is faked. */
 let computed: { color: string; accent: string };
 
 beforeEach(() => {

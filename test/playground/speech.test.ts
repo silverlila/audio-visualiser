@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { appendFinal, readResults } from "./speech";
+import { appendFinal, readResults } from "../../playground/speech";
 
 function result(transcript: string, isFinal: boolean) {
   return { isFinal, 0: { transcript } };
