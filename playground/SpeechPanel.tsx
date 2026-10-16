@@ -7,8 +7,8 @@
  */
 import { useEffect, useState } from "react";
 import type { ReactElement } from "react";
-import { microphoneVisualState } from "@silver/audio-visualiser/react";
-import type { MicrophoneSnapshot, VisualState } from "@silver/audio-visualiser/react";
+import { microphoneVisualState } from "@silverlila/audio-visualiser/react";
+import type { MicrophoneSnapshot, VisualState } from "@silverlila/audio-visualiser/react";
 import { RecordingWindow } from "./RecordingWindow";
 import { useSpeechToText } from "./useSpeechToText";
 

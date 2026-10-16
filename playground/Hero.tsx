@@ -3,17 +3,17 @@ import { CodeBlock, CodeTabs, CopyButton } from "./Code";
 import type { CodeFile } from "./Code";
 
 const INSTALL: readonly [CodeFile, ...CodeFile[]] = [
-  { label: "npm", language: "sh", code: "npm install @silver/audio-visualiser" },
-  { label: "pnpm", language: "sh", code: "pnpm add @silver/audio-visualiser" },
-  { label: "yarn", language: "sh", code: "yarn add @silver/audio-visualiser" },
-  { label: "bun", language: "sh", code: "bun add @silver/audio-visualiser" },
+  { label: "npm", language: "sh", code: "npm install @silverlila/audio-visualiser" },
+  { label: "pnpm", language: "sh", code: "pnpm add @silverlila/audio-visualiser" },
+  { label: "yarn", language: "sh", code: "yarn add @silverlila/audio-visualiser" },
+  { label: "bun", language: "sh", code: "bun add @silverlila/audio-visualiser" },
 ];
 
 const IMPORTS = `// Core, for any framework, no dependencies
-import { createMicrophone, createVisualiser } from "@silver/audio-visualiser";
+import { createMicrophone, createVisualiser } from "@silverlila/audio-visualiser";
 
 // React 19: a component and a hook
-import { AudioVisualiser, useMicrophone } from "@silver/audio-visualiser/react";`;
+import { AudioVisualiser, useMicrophone } from "@silverlila/audio-visualiser/react";`;
 
 export function Hero(): ReactElement {
   return (

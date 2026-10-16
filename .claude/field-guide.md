@@ -11,5 +11,5 @@ line worth less. Coding standards belong in a skill, not here.
 - jsdom computes `getComputedStyle(el).color` as `rgb(0, 0, 0)` for a detached element where browsers return `""`; tests of colour reading must stub `getComputedStyle` (see `test/surface.test.ts`).
 - Port 5173 is often taken by another local Vite app, and the user may run their own server on 5199; check `lsof -nP -iTCP:<port> -sTCP:LISTEN` first, use a free port with `--strictPort`, and stop only servers you started.
 - Don't link this repo into an app (`pnpm add ../audio-visualiser`): its devDependency React becomes a second copy. `pnpm pack` and install the `.tgz` (it holds only `dist/`).
-- `tsconfig.test.json` has no `paths`, so a test can't import a playground module that imports `@silver/audio-visualiser` (even type-only); keep testable playground logic free of library imports (see `playground/highlight.ts`).
+- `tsconfig.test.json` has no `paths`, so a test can't import a playground module that imports `@silverlila/audio-visualiser` (even type-only); keep testable playground logic free of library imports (see `playground/highlight.ts`).
 - The playground runs under StrictMode, so `useSpeechToText` builds two recognitions and stops the first; fake recognitions must do nothing until `start()` or results arrive twice.

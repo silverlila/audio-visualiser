@@ -26,8 +26,8 @@
 
     /* Package aliases (mirrors vite.config.ts) */
     "paths": {
-      "@silver/audio-visualiser": ["./src/index.ts"],
-      "@silver/audio-visualiser/react": ["./src/react/index.ts"]
+      "@silverlila/audio-visualiser": ["./src/index.ts"],
+      "@silverlila/audio-visualiser/react": ["./src/react/index.ts"]
     }
   },
   "include": ["playground"]

@@ -1,25 +1,25 @@
 <p align="center"><img src="assets/logo.svg" width="96" height="96" alt=""></p>
 
-# @silver/audio-visualiser
+# @silverlila/audio-visualiser
 
 A small canvas visualiser for live microphone audio. It shows what your app is doing (idle,
 connecting, recording, processing, done or error) and moves smoothly between those states. Use it
 as the indicator next to a record or dictation button.
 
 - Six looks: `timeline`, `pill`, `spectrum`, `line`, `orb`, `radial`.
-- Works in any framework. A React component and hook ship in `@silver/audio-visualiser/react`.
+- Works in any framework. A React component and hook ship in `@silverlila/audio-visualiser/react`.
 - Themed with CSS: `color` sets the ink and `--av-accent` sets the accent.
 - Sharp on high-DPI screens, and accessible: it sets `role="img"` and an `aria-label`. It respects
   reduced motion.
 
 ```sh
-npm install @silver/audio-visualiser
+npm install @silverlila/audio-visualiser
 ```
 
 ## React
 
 ```tsx
-import { AudioVisualiser, microphoneVisualState, useMicrophone } from "@silver/audio-visualiser/react";
+import { AudioVisualiser, microphoneVisualState, useMicrophone } from "@silverlila/audio-visualiser/react";
 
 export function RecordButton() {
   const mic = useMicrophone();
@@ -48,7 +48,7 @@ To show that your app is working on the recording, pass any state yourself:
 ## Vanilla
 
 ```ts
-import { createMicrophone, createVisualiser, microphoneVisualState } from "@silver/audio-visualiser";
+import { createMicrophone, createVisualiser, microphoneVisualState } from "@silverlila/audio-visualiser";
 
 const mic = createMicrophone();
 const vis = createVisualiser(canvas, { variant: "spectrum" });
@@ -87,3 +87,7 @@ pnpm dev    # playground with live examples
 pnpm test
 pnpm build
 ```
+
+## License
+
+MIT

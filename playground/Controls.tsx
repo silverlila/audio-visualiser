@@ -8,8 +8,8 @@
  */
 import { useId } from "react";
 import type { ReactElement } from "react";
-import { VARIANTS, VISUAL_STATES } from "@silver/audio-visualiser/react";
-import type { MicrophoneSnapshot, VariantName, VisualState } from "@silver/audio-visualiser/react";
+import { VARIANTS, VISUAL_STATES } from "@silverlila/audio-visualiser/react";
+import type { MicrophoneSnapshot, VariantName, VisualState } from "@silverlila/audio-visualiser/react";
 
 export type SourceKind = "mic" | "tone" | "file";
 export type Theme = "system" | "light" | "dark";

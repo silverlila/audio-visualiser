@@ -1,4 +1,4 @@
-import { createMicrophone, createVisualiser, microphoneVisualState } from "@silver/audio-visualiser";
+import { createMicrophone, createVisualiser, microphoneVisualState } from "@silverlila/audio-visualiser";
 
 const askAssistant = () => new Promise<void>((resolve) => setTimeout(resolve, 1500));
 

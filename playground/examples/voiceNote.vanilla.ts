@@ -1,4 +1,4 @@
-import { createMicrophone, createVisualiser, microphoneVisualState } from "@silver/audio-visualiser";
+import { createMicrophone, createVisualiser, microphoneVisualState } from "@silverlila/audio-visualiser";
 
 export function mount(root: HTMLElement): () => void {
   const canvas = document.createElement("canvas");

@@ -1,7 +1,7 @@
 import { useEffect, useEffectEvent, useRef, useState } from "react";
 import type { ReactElement } from "react";
-import { AudioVisualiser, microphoneVisualState, useMicrophone } from "@silver/audio-visualiser/react";
-import type { MicrophoneSnapshot, UseMicrophoneResult, VisualState } from "@silver/audio-visualiser/react";
+import { AudioVisualiser, microphoneVisualState, useMicrophone } from "@silverlila/audio-visualiser/react";
+import type { MicrophoneSnapshot, UseMicrophoneResult, VisualState } from "@silverlila/audio-visualiser/react";
 import { LookControls, SourceControls, ThemeSwitch } from "./Controls";
 import type { Look, SourceKind, Theme } from "./Controls";
 import { Examples } from "./Examples";

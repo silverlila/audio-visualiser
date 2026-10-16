@@ -1,7 +1,16 @@
 {
-  "name": "@silver/audio-visualiser",
-  "private": true,
+  "name": "@silverlila/audio-visualiser",
   "version": "0.1.0",
+  "description": "Canvas visualiser for live microphone audio, with React bindings",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/silverlila/audio-visualiser.git"
+  },
+  "homepage": "https://silverlila.github.io/audio-visualiser/",
+  "publishConfig": {
+    "access": "public"
+  },
   "type": "module",
   "files": ["dist"],
   "sideEffects": false,

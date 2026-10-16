@@ -1,6 +1,6 @@
 import type { ReactElement } from "react";
-import { AudioVisualiser, VARIANTS } from "@silver/audio-visualiser/react";
-import type { VisualState } from "@silver/audio-visualiser/react";
+import { AudioVisualiser, VARIANTS } from "@silverlila/audio-visualiser/react";
+import type { VisualState } from "@silverlila/audio-visualiser/react";
 
 export function Gallery(props: {
   readonly stream: MediaStream | null;

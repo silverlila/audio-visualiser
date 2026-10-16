@@ -10,8 +10,8 @@ export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: [
-      { find: /^@silver\/audio-visualiser\/react$/, replacement: fromRoot("./src/react/index.ts") },
-      { find: /^@silver\/audio-visualiser$/, replacement: fromRoot("./src/index.ts") },
+      { find: /^@silverlila\/audio-visualiser\/react$/, replacement: fromRoot("./src/react/index.ts") },
+      { find: /^@silverlila\/audio-visualiser$/, replacement: fromRoot("./src/index.ts") },
     ],
   },
 });

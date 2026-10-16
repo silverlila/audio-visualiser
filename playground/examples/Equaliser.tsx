@@ -1,4 +1,4 @@
-import { AudioVisualiser, microphoneVisualState, useMicrophone } from "@silver/audio-visualiser/react";
+import { AudioVisualiser, microphoneVisualState, useMicrophone } from "@silverlila/audio-visualiser/react";
 
 export default function Equaliser() {
   const mic = useMicrophone();

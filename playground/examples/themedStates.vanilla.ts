@@ -1,4 +1,4 @@
-import { createMicrophone, createVisualiser, microphoneVisualState } from "@silver/audio-visualiser";
+import { createMicrophone, createVisualiser, microphoneVisualState } from "@silverlila/audio-visualiser";
 import "./themedStates.css";
 
 export function mount(root: HTMLElement): () => void {

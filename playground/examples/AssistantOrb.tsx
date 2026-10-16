@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { AudioVisualiser, microphoneVisualState, useMicrophone } from "@silver/audio-visualiser/react";
+import { AudioVisualiser, microphoneVisualState, useMicrophone } from "@silverlila/audio-visualiser/react";
 
 const askAssistant = () => new Promise<void>((resolve) => setTimeout(resolve, 1500));
 
