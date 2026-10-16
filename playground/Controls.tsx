@@ -1,12 +1,19 @@
+/**
+ * The playground's control panels: choosing a source (microphone, tone or file), the Look
+ * settings, and the theme switch.
+ *
+ * A disabled button loses keyboard focus, so pending actions use `aria-disabled` and keep focus.
+ * Browsers fire no `change` on `<input type=file>` when the same file is chosen again unless its
+ * `value` is reset.
+ */
 import { useId } from "react";
 import type { ReactElement } from "react";
-import { VARIANTS, VISUAL_STATES } from "audio-visualiser/react";
-import type { MicrophoneSnapshot, VariantName, VisualState } from "audio-visualiser/react";
+import { VARIANTS, VISUAL_STATES } from "@silver/audio-visualiser/react";
+import type { MicrophoneSnapshot, VariantName, VisualState } from "@silver/audio-visualiser/react";
 
 export type SourceKind = "mic" | "tone" | "file";
 export type Theme = "system" | "light" | "dark";
 
-/** How the visualisers are drawn. `ink: null` means the theme's text colour. */
 export interface Look {
   readonly variant: VariantName;
   readonly stateOverride: VisualState | "auto";
@@ -48,7 +55,6 @@ const INK_OPTIONS: readonly Option<string | null>[] = [
   { value: "oklch(0.56 0.21 305)", label: "Violet" },
 ];
 
-/** A row of radio buttons drawn as chips. Wraps on narrow screens. */
 function ChipGroup<T>(props: {
   readonly legend: string;
   readonly options: readonly Option<T>[];
@@ -83,10 +89,8 @@ export function ThemeSwitch(props: { readonly theme: Theme; readonly onChange: (
 
 export interface SourceControlsProps {
   readonly source: SourceKind;
-  /** What the tone or file source is playing, or null when it is stopped. */
   readonly playing: string | null;
   readonly mic: Pick<MicrophoneSnapshot, "status" | "devices" | "error">;
-  /** Why the chosen audio file could not be played, or null. */
   readonly fileError: string | null;
   readonly deviceId: string;
   readonly agc: boolean;
@@ -110,7 +114,6 @@ function MicrophoneControls(props: SourceControlsProps): ReactElement {
   const { mic } = props;
   const deviceSelectId = useId();
   const devices = mic.devices.filter((device) => device.id !== "");
-  // aria-disabled rather than disabled: the button keeps keyboard focus while the request is pending.
   const requesting = mic.status === "requesting";
   return (
     <>
@@ -174,7 +177,6 @@ function FileControls(props: SourceControlsProps): ReactElement {
             className="visually-hidden"
             onChange={(event) => {
               const file = event.target.files?.[0];
-              // Cleared so that choosing the same file again still fires a change.
               event.target.value = "";
               if (file !== undefined) props.onFileChoose(file);
             }}
@@ -204,9 +206,9 @@ export function SourceControls(props: SourceControlsProps): ReactElement {
   const Specific = SOURCE_CONTROLS[props.source];
   return (
     <section className="panel-section" aria-labelledby="source-heading">
-      <h2 id="source-heading" className="section-title">
+      <h3 id="source-heading" className="section-title">
         Source
-      </h2>
+      </h3>
       <ChipGroup legend="Audio source" hideLegend options={SOURCE_OPTIONS} value={props.source} onChange={props.onSourceChange} />
       {props.mic.error !== null && (
         <p role="alert" className="alert">
@@ -229,9 +231,9 @@ export function LookControls(props: { readonly look: Look; readonly onChange: (l
   const inkName = useId();
   return (
     <section className="panel-section" aria-labelledby="look-heading">
-      <h2 id="look-heading" className="section-title">
+      <h3 id="look-heading" className="section-title">
         Look
-      </h2>
+      </h3>
       <ChipGroup
         legend="Variant"
         options={VARIANT_OPTIONS}

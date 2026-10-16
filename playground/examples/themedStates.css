@@ -1,0 +1,25 @@
+.themed {
+  color: #8e8e93;
+  --av-accent: #8e8e93;
+  transition: color 300ms;
+}
+
+.themed[data-state="connecting"] {
+  color: #ff9f0a;
+  --av-accent: #ff9f0a;
+}
+
+.themed[data-state="recording"] {
+  color: #5e5ce6;
+  --av-accent: #ff3b30;
+}
+
+.themed[data-state="done"] {
+  color: #34c759;
+  --av-accent: #34c759;
+}
+
+.themed[data-state="error"] {
+  color: #ff3b30;
+  --av-accent: #ff3b30;
+}

@@ -1,10 +1,13 @@
 import { useEffect, useEffectEvent, useRef, useState } from "react";
 import type { ReactElement } from "react";
-import { AudioVisualiser, microphoneVisualState, useMicrophone } from "audio-visualiser/react";
-import type { MicrophoneSnapshot, UseMicrophoneResult, VisualState } from "audio-visualiser/react";
+import { AudioVisualiser, microphoneVisualState, useMicrophone } from "@silver/audio-visualiser/react";
+import type { MicrophoneSnapshot, UseMicrophoneResult, VisualState } from "@silver/audio-visualiser/react";
 import { LookControls, SourceControls, ThemeSwitch } from "./Controls";
 import type { Look, SourceKind, Theme } from "./Controls";
+import { Examples } from "./Examples";
 import { Gallery } from "./Gallery";
+import { Hero } from "./Hero";
+import { RecordingWindow } from "./RecordingWindow";
 import { SpeechPanel } from "./SpeechPanel";
 import { createFileSource, createToneSource } from "./sources";
 import type { FakeSource } from "./sources";
@@ -14,7 +17,6 @@ interface Playing {
   readonly name: string;
 }
 
-/** The selected source. Only the tone and file sources own something that plays. */
 type Feed = { readonly kind: "mic" } | { readonly kind: "tone" | "file"; readonly playing: Playing | null };
 
 const FILE_UNPLAYABLE = "This file can't be played in this browser. Choose a different audio file.";
@@ -44,23 +46,19 @@ const NO_MICROPHONE = { status: "idle", devices: [], error: null } as const sati
 
 const DEFAULT_LOOK: Look = { variant: "timeline", stateOverride: "auto", height: 64, ink: null };
 
-/** An empty id means the browser's default input. */
 function deviceChoice(deviceId: string): DeviceChoice {
   return deviceId === "" ? {} : { deviceId };
 }
 
-/** The state the visualisers show when nothing overrides it. */
 function autoState(feed: Feed, mic: Pick<MicrophoneSnapshot, "status">, stream: MediaStream | null): VisualState {
   if (feed.kind === "mic") return microphoneVisualState(mic);
   return stream === null ? "idle" : "recording";
 }
 
-/** What the feed is playing, or null for the microphone or a stopped tone/file. */
 function sourceOf(feed: Feed): FakeSource | null {
   return feed.kind === "mic" ? null : (feed.playing?.source ?? null);
 }
 
-/** The same feed with nothing playing. */
 function withoutSource(feed: Feed): Feed {
   return feed.kind === "mic" ? feed : { kind: feed.kind, playing: null };
 }
@@ -70,8 +68,6 @@ function clearTimers(timers: Set<number>): void {
   timers.clear();
 }
 
-/** Owns one microphone. `useMicrophone` reads its options once, so the parent remounts this with a
- *  new `key` to change AGC; `resume` restarts the new microphone when the old one was live. */
 function MicrophoneHost(props: {
   readonly agc: boolean;
   readonly resume: DeviceChoice | null;
@@ -109,7 +105,6 @@ function App(): ReactElement {
   const micSnapshot = mic ?? NO_MICROPHONE;
   const state = simulated ?? (look.stateOverride === "auto" ? autoState(feed, micSnapshot, stream) : look.stateOverride);
 
-  // Whoever stops a source also clears it from state, so a stopped source is never shown as playing.
   const releaseSource = useEffectEvent(() => {
     sourceOf(feed)?.stop();
     setFeed(withoutSource);
@@ -125,7 +120,6 @@ function App(): ReactElement {
     return () => clearTimers(pending);
   }, []);
 
-  /** The one place the feed changes: the outgoing tone or file source is stopped here. */
   function changeFeed(next: Feed): void {
     const outgoing = sourceOf(feed);
     if (outgoing !== null && outgoing !== sourceOf(next)) outgoing.stop();
@@ -211,83 +205,122 @@ function App(): ReactElement {
     <div className="page">
       <MicrophoneHost key={String(agc)} agc={agc} resume={resumeMic} onChange={setMic} />
 
-      <header className="masthead">
-        <div>
-          <h1 className="title">audio-visualiser</h1>
-          <p className="subtitle">Live audio as small, state-aware visuals. Pick a source and try every look.</p>
+      <header className="site-header">
+        <div className="brand">
+          <img src="/logo.svg" width="28" height="28" alt="" />
+          audio-visualiser
         </div>
+        <nav className="site-nav" aria-label="Sections">
+          <a href="#playground">Playground</a>
+          <a href="#examples">Examples</a>
+          <a href="#speech">Speech to text</a>
+        </nav>
         <ThemeSwitch theme={theme} onChange={setTheme} />
       </header>
 
-      <main className="layout">
-        <section className="card area-stage" aria-labelledby="preview-heading">
-          <div className="card-head">
-            <h2 id="preview-heading" className="section-title">
-              Preview
+      <main className="sections">
+        <Hero />
+
+        <section id="playground" className="page-section" aria-labelledby="playground-heading">
+          <div className="section-head">
+            <h2 id="playground-heading" className="page-heading">
+              Playground
             </h2>
-            <span className="badge">
-              <span className="state-dot" data-state={state} />
-              {look.variant} · {state}
-            </span>
+            <p className="subtitle">Pick a source, then try every variant, state and colour.</p>
           </div>
-          <div className="preview" style={{ ...inkStyle, height: look.height }}>
-            <AudioVisualiser
-              stream={stream}
-              state={state}
-              variant={look.variant}
-              aria-label={`Preview, ${look.variant} visualiser, ${state}`}
+
+          <div className="layout">
+            <section className="card area-stage" aria-labelledby="preview-heading">
+              <div className="card-head">
+                <h3 id="preview-heading" className="section-title">
+                  Preview
+                </h3>
+                <span className="badge">
+                  <span className="state-dot" data-state={state} />
+                  {look.variant} · {state}
+                </span>
+              </div>
+              <div className="preview" style={{ ...inkStyle, height: look.height }}>
+                <AudioVisualiser
+                  stream={stream}
+                  state={state}
+                  variant={look.variant}
+                  aria-label={`Preview, ${look.variant} visualiser, ${state}`}
+                />
+              </div>
+            </section>
+
+            <section className="card area-dictation" aria-label="Dictation simulation">
+              <div className="dictation">
+                <RecordingWindow stream={stream} state={state} variant="pill" aria-label="Recording window preview">
+                  {WINDOW_LABELS[state]}
+                </RecordingWindow>
+                <button type="button" className="button button-primary" onClick={toggleSimulation}>
+                  {simulated === null ? "Simulate dictation" : "Cancel simulation"}
+                </button>
+                <p className="hint">Connecting, then recording for 4 s, processing and done. Plays the test tone if nothing is live.</p>
+              </div>
+            </section>
+
+            <aside className="card area-controls" aria-label="Controls">
+              <SourceControls
+                source={feed.kind}
+                playing={feed.kind === "mic" ? null : (feed.playing?.name ?? null)}
+                mic={micSnapshot}
+                fileError={fileError}
+                deviceId={deviceId}
+                agc={agc}
+                onSourceChange={selectSource}
+                onMicToggle={toggleMicrophone}
+                onDeviceChange={changeDevice}
+                onAgcChange={changeAgc}
+                onToneToggle={toggleTone}
+                onFileChoose={playFile}
+                onFileStop={() => changeFeed({ kind: "file", playing: null })}
+              />
+              <LookControls look={look} onChange={setLook} />
+            </aside>
+
+            <section className="card area-gallery" aria-labelledby="gallery-heading">
+              <h3 id="gallery-heading" className="section-title">
+                All variants
+              </h3>
+              <Gallery stream={stream} state={state} ink={look.ink} />
+            </section>
+          </div>
+        </section>
+
+        <section id="examples" className="page-section" aria-labelledby="examples-heading">
+          <div className="section-head">
+            <h2 id="examples-heading" className="page-heading">
+              Examples
+            </h2>
+            <p className="subtitle">
+              Each preview runs the code beside it, using the public API and your microphone. Copy the React or the vanilla
+              version.
+            </p>
+          </div>
+          <Examples />
+        </section>
+
+        <section id="speech" className="page-section" aria-labelledby="speech-heading">
+          <div className="section-head">
+            <h2 id="speech-heading" className="page-heading">
+              Speech to text
+            </h2>
+            <p className="subtitle">
+              Dictate with your browser's speech recognition. The window records while you speak, transcribes after Stop,
+              then settles.
+            </p>
+          </div>
+          <div className="card">
+            <SpeechPanel
+              stream={mic?.stream ?? null}
+              mic={micSnapshot}
+              onStart={startMicrophone}
+              onStop={() => mic?.stop()}
             />
           </div>
-        </section>
-
-        <section className="card area-dictation" aria-label="Dictation simulation">
-          <div className="dictation">
-            <div className="recording-window">
-              <div className="recording-window-viz">
-                <AudioVisualiser stream={stream} state={state} variant="pill" aria-label="Recording window preview" />
-              </div>
-              <span className="recording-window-label" role="status">
-                {WINDOW_LABELS[state]}
-              </span>
-            </div>
-            <button type="button" className="button button-primary" onClick={toggleSimulation}>
-              {simulated === null ? "Simulate dictation" : "Cancel simulation"}
-            </button>
-            <p className="hint">Connecting, then recording for 4 s, processing and done. Plays the test tone if nothing is live.</p>
-          </div>
-        </section>
-
-        <aside className="card area-controls" aria-label="Controls">
-          <SourceControls
-            source={feed.kind}
-            playing={feed.kind === "mic" ? null : (feed.playing?.name ?? null)}
-            mic={micSnapshot}
-            fileError={fileError}
-            deviceId={deviceId}
-            agc={agc}
-            onSourceChange={selectSource}
-            onMicToggle={toggleMicrophone}
-            onDeviceChange={changeDevice}
-            onAgcChange={changeAgc}
-            onToneToggle={toggleTone}
-            onFileChoose={playFile}
-            onFileStop={() => changeFeed({ kind: "file", playing: null })}
-          />
-          <LookControls look={look} onChange={setLook} />
-        </aside>
-
-        <section className="card area-gallery" aria-labelledby="gallery-heading">
-          <h2 id="gallery-heading" className="section-title">
-            All variants
-          </h2>
-          <Gallery stream={stream} state={state} ink={look.ink} />
-        </section>
-
-        <section className="card area-speech" aria-labelledby="speech-heading">
-          <h2 id="speech-heading" className="section-title">
-            Speech to text
-          </h2>
-          <SpeechPanel onStart={startMicrophone} onStop={() => mic?.stop()} />
         </section>
       </main>
     </div>

@@ -10,8 +10,8 @@ function getRecognitionConstructor() {
 export function useSpeechToText(
   props: {
     onInterimTranscript?: (transcript: string) => void;
-    /** Receives each new final chunk, not the accumulated transcript. */
     onFinalTranscript?: (chunk: string) => void;
+    onEnd?: () => void;
   } = {},
 ) {
   const recognitionRef = React.useRef<SpeechRecognition | null>(null);
@@ -30,6 +30,9 @@ export function useSpeechToText(
   });
   const emitInterim = React.useEffectEvent((text: string) => {
     props.onInterimTranscript?.(text);
+  });
+  const emitEnd = React.useEffectEvent(() => {
+    props.onEnd?.();
   });
 
   React.useEffect(() => {
@@ -61,6 +64,7 @@ export function useSpeechToText(
       listeningRef.current = false;
       setIsListening(false);
       setInterimTranscript("");
+      emitEnd();
     };
 
     recognition.onstart = () => {

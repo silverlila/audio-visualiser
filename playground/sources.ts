@@ -1,4 +1,10 @@
-/** A stand-in for a microphone. `stop` is idempotent and never touches anyone else's AudioContext. */
+/**
+ * Stand-in audio sources for the playground, a synthetic voice-like tone and a played-back file,
+ * each exposed as a `MediaStream`.
+ *
+ * Pausing an HTMLMediaElement before playback begins rejects `play()` with an AbortError.
+ */
+
 export interface FakeSource {
   readonly stream: MediaStream;
   stop(): void;
@@ -13,7 +19,6 @@ function newAudioContext(): AudioContext {
   return new AudioContext();
 }
 
-/** A gain stage whose gain swings 0..1 at `hz`: a sine LFO of depth 0.5 added to a base of 0.5. */
 function pulse(ctx: AudioContext, hz: number): { readonly lfo: OscillatorNode; readonly gain: GainNode } {
   const gain = ctx.createGain();
   gain.gain.value = 0.5;
@@ -26,8 +31,6 @@ function pulse(ctx: AudioContext, hz: number): { readonly lfo: OscillatorNode; r
   return { lfo, gain };
 }
 
-/** Speech-like test signal: sawtooth ~140 Hz -> lowpass 1800 Hz -> gain driven by a 4 Hz "syllable"
- *  LFO times a slow 0.3 Hz phrase LFO -> MediaStreamAudioDestinationNode. Owns its own AudioContext. */
 export function createToneSource(createContext: () => AudioContext = newAudioContext): FakeSource {
   const ctx = createContext();
 
@@ -64,12 +67,9 @@ export function createToneSource(createContext: () => AudioContext = newAudioCon
 }
 
 export interface FileSource extends FakeSource {
-  /** Resolves once playback begins, or when the source is stopped first. Rejects with the browser's
-   *  error when it cannot play the file. */
   readonly started: Promise<void>;
 }
 
-/** Loops the file through an <audio> element -> MediaElementSource -> speakers + MediaStreamDestination. */
 export function createFileSource(file: File, createContext: () => AudioContext = newAudioContext): FileSource {
   const url = URL.createObjectURL(file);
   const element = new Audio(url);
@@ -82,8 +82,6 @@ export function createFileSource(file: File, createContext: () => AudioContext =
   source.connect(output);
 
   let stopped = false;
-  // Pausing before playback begins rejects play() with an AbortError; that is this source being
-  // stopped, not a failure. Anything else (an undecodable file) rejects `started` for the caller.
   const started = element.play().catch((cause: unknown) => {
     if (!stopped) throw cause;
   });

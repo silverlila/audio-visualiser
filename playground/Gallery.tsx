@@ -1,8 +1,7 @@
 import type { ReactElement } from "react";
-import { AudioVisualiser, VARIANTS } from "audio-visualiser/react";
-import type { VisualState } from "audio-visualiser/react";
+import { AudioVisualiser, VARIANTS } from "@silver/audio-visualiser/react";
+import type { VisualState } from "@silver/audio-visualiser/react";
 
-/** Every variant side by side, all drawing the same stream in the same state. */
 export function Gallery(props: {
   readonly stream: MediaStream | null;
   readonly state: VisualState;

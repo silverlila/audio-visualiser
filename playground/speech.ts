@@ -1,10 +1,15 @@
-/** Structural subset of the DOM SpeechRecognitionResult, whose alternatives are index-signature only. */
+/**
+ * Turns Web Speech recognition results into final and interim transcript text.
+ *
+ * The DOM `SpeechRecognitionResult` exposes alternatives through an index signature only, so
+ * `readResults` accepts a structural subset.
+ */
+
 type RecognitionResult = {
   readonly isFinal: boolean;
   readonly [alternative: number]: { readonly transcript: string };
 };
 
-/** Final and interim text from one SpeechRecognition result event, from resultIndex on. */
 export function readResults(
   results: ArrayLike<RecognitionResult>,
   resultIndex: number,
@@ -19,7 +24,6 @@ export function readResults(
   return { final, interim };
 }
 
-/** Appends a final chunk with exactly one space between chunks; trims chunk edges; empty chunk returns previous. */
 export function appendFinal(previous: string, chunk: string): string {
   const trimmed = chunk.trim();
   if (trimmed === "") return previous;
