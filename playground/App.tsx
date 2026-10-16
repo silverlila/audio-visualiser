@@ -207,7 +207,7 @@ function App(): ReactElement {
 
       <header className="site-header">
         <div className="brand">
-          <img src="/logo.svg" width="28" height="28" alt="" />
+          <img src={`${import.meta.env.BASE_URL}logo.svg`} width="28" height="28" alt="" />
           audio-visualiser
         </div>
         <nav className="site-nav" aria-label="Sections">

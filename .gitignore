@@ -24,3 +24,6 @@ dist-playground
 *.njsproj
 *.sln
 *.sw?
+
+# Planning docs
+specs
